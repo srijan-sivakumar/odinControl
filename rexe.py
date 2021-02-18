@@ -1,9 +1,31 @@
 from os import path
 import argparse
 import logging
+import logging.handlers
 import paramiko
 import yaml
 
+
+logger = logging.getLogger(__name__)
+
+def set_logging_options(log_file_path, log_file_level):
+    """
+    This function is for configuring the logger
+    """
+    global logger
+    valid_log_level = ['I', 'D', 'W', 'E']
+    log_level_dict = {'I':logging.INFO, 'D':logging.DEBUG, 'W':logging.WARNING,
+                      'E':logging.ERROR}
+    log_format = logging.Formatter("[%(asctime)s] %(levelname)s "
+                                   "[%(module)s - %(lineno)s:%(funcName)s] "
+                                   "- %(message)s")
+    if log_file_level not in ['I', 'W', 'D', 'E']:
+        print("Invalid log level given, Taking Log Level as Info.")
+        log_file_level = 'I'
+    logger.setLevel(log_level_dict[log_file_level])
+    log_file_handler = logging.handlers.WatchedFileHandler(log_file_path)
+    log_file_handler.setFormatter(log_format)
+    logger.addHandler(log_file_handler)
 
 def is_file_accessible(path, mode='rw+'):
     """
@@ -22,10 +44,7 @@ class Rexe:
         self.conf_path = conf_path
         self.command_file_path = command_file_path
         self.parse_conf_file()
-        print(self.conf_data)
-
-    def logger_init(self):
-        
+        logger.debug(f"Conf file data : {self.conf_data}")
 
     def parse_conf_file(self):
         """
@@ -52,7 +71,7 @@ class Rexe:
             try:
                 node_ssh_client.connect(hostname=node, username=self.host_user, password=self.host_passwd)
             except paramiko.ssh_exception.AuthenticationException:
-                print("Authentication failure. Please check conf.")
+                logger.error("Authentication failure. Please check conf.")
                 self.connect_flag = False
             self.node_dict[node] = node_ssh_client
 
@@ -68,11 +87,6 @@ class Rexe:
         command file.
         """
         print("Run the whole script.")
-
-
-#ssh_client = paramiko.SSHClient()
-#ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-#ssh_client.connect(hostname='10.70.41.184', username='root', password='redhat')
 
 def exec_remote(cmd):
     result_dict_val = {}
@@ -102,8 +116,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Set logger options
-    logger = logging.getLogger('root')
-    format_val = '[%(asctime)s:%(levelname)s:%(filename)s:%(lineno)s:%(funcName)s()]-5(message)s'
+    set_logging_options(args.log_path, args.log_level)
+
 
     # Validate the conf and command_exec file path.
     if not is_file_accessible(args.conf_path, 'r'):
