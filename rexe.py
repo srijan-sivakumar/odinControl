@@ -1,5 +1,5 @@
 from os import path
-from threading import thread
+from threading import Thread
 import argparse
 import logging
 import logging.handlers
@@ -117,7 +117,7 @@ class Rexe:
                 continue
             commands_list = self.exec_data[command_node]
             for command_line in commands_list:
-
+                pass #for compiling else gives Indentation Error
         print("Run the whole script.")
 
 if __name__ == "__main__":
