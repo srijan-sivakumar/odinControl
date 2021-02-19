@@ -70,6 +70,7 @@ class Rexe:
             node_ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             try:
                 node_ssh_client.connect(hostname=node, username=self.host_user, password=self.host_passwd)
+                logger.debug(f"SSH connection to {node} is successful.")
             except paramiko.ssh_exception.AuthenticationException:
                 logger.error("Authentication failure. Please check conf.")
                 self.connect_flag = False
@@ -79,7 +80,17 @@ class Rexe:
         """
         Function to execute command in the given node.
         """
-        print("Run the given command.")
+        ret_dict = {}
+        if not self.connect_flag:
+            ret_dict['Flag'] = False
+            return ret_dict
+        stdin, stdout, stderr = self.node_dict[node].exec_command(cmd)
+        if stderr.readlines() != []:
+            log.info(stderr.readlines())
+
+        ret_dict['Flag'] = True
+        ret_dict['msg'] = stdout.readlines()
+        return ret_dict
 
     def execute_command_file(self):
         """
@@ -87,18 +98,6 @@ class Rexe:
         command file.
         """
         print("Run the whole script.")
-
-def exec_remote(cmd):
-    result_dict_val = {}
-    stdin, stdout, stderr = ssh_client.exec_command(cmd)
-    if stderr.readlines() != []:
-        print(stderr.readlines())
-    else:
-        result_xml_string = ""
-        for line in stdout.readlines():
-            result_xml_string += line
-        result_dict_val = xmltodict.parse(result_xml_string)['cliOutput']
-    return result_dict_val
 
 if __name__ == "__main__":
     exit_flag = False
@@ -108,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--conf_path', dest='conf_path', help="Configuration file path",
                         default="/home/rexe_conf.ini", type=str)
     parser.add_argument('-e', '--exec_fpath', dest='exec_fpath', help="Execution instructions file path",
-                        default="/home/rexe_exec", type=str)
+                        default="", type=str, required=False)
     parser.add_argument('-l', '--log_path', dest='log_path', help="Logfile path",
                         default="/tmp/rexe.log", type=str)
     parser.add_argument('-ll', '--log_level', dest='log_level', help="Log Level",
@@ -118,12 +117,11 @@ if __name__ == "__main__":
     # Set logger options
     set_logging_options(args.log_path, args.log_level)
 
-
     # Validate the conf and command_exec file path.
     if not is_file_accessible(args.conf_path, 'r'):
         print(f"Configuration file doesn't exist at {args.conf_path}")
         exit_flag = True
-    if not is_file_accessible(args.exec_fpath, 'r'):
+    if args.exec_fpath != "" and not is_file_accessible(args.exec_fpath, 'r'):
         print(f"Command execution file doesn't exist at {args.exec_fpath}")
         exit_flag = True
     if not exit_flag:
