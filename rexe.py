@@ -1,4 +1,5 @@
 from os import path
+from threading import thread
 import argparse
 import logging
 import logging.handlers
@@ -13,13 +14,13 @@ def set_logging_options(log_file_path, log_file_level):
     This function is for configuring the logger
     """
     global logger
-    valid_log_level = ['I', 'D', 'W', 'E']
+    valid_log_level = ['I', 'D', 'W', 'E', 'C']
     log_level_dict = {'I':logging.INFO, 'D':logging.DEBUG, 'W':logging.WARNING,
-                      'E':logging.ERROR}
+            'E':logging.ERROR, 'C':logging.CRITICAL}
     log_format = logging.Formatter("[%(asctime)s] %(levelname)s "
                                    "[%(module)s - %(lineno)s:%(funcName)s] "
                                    "- %(message)s")
-    if log_file_level not in ['I', 'W', 'D', 'E']:
+    if log_file_level not in valid_log_level:
         print("Invalid log level given, Taking Log Level as Info.")
         log_file_level = 'I'
     logger.setLevel(log_level_dict[log_file_level])
@@ -44,6 +45,8 @@ class Rexe:
         self.conf_path = conf_path
         self.command_file_path = command_file_path
         self.parse_conf_file()
+        if command_file_path != "":
+            self.parse_exec_file()
         logger.debug(f"Conf file data : {self.conf_data}")
 
     def parse_conf_file(self):
@@ -57,6 +60,15 @@ class Rexe:
         self.host_list = self.conf_data['host_list']
         self.host_user = self.conf_data['user']
         self.host_passwd = self.conf_data['passwd']
+
+    def parse_exec_file(self):
+        """
+        Function to parse the exec file
+        """
+        self.exec_file_handle = open(self.command_file_path)
+        self.exec_data = yaml.load(self.exec_file_handle, Loader=yaml.FullLoader)
+        self.conf_file_handle.close()
+        logger.debug(f"Exec file data : {self.exec_data}")
 
     def establish_connection(self):
         """
@@ -97,6 +109,15 @@ class Rexe:
         Function to execute the commands provided in the
         command file.
         """
+        if self.command_file_path == "" and not self.connect_flag:
+            return -1
+        for command_node in self.exec_data:
+            if command_node not in self.host_list and command_node != "all":
+                logger.info(f"The command node {command_node} is not in host list.")
+                continue
+            commands_list = self.exec_data[command_node]
+            for command_line in commands_list:
+
         print("Run the whole script.")
 
 if __name__ == "__main__":
@@ -116,13 +137,16 @@ if __name__ == "__main__":
 
     # Set logger options
     set_logging_options(args.log_path, args.log_level)
+    logger.info("REXE Initiated")
 
     # Validate the conf and command_exec file path.
     if not is_file_accessible(args.conf_path, 'r'):
         print(f"Configuration file doesn't exist at {args.conf_path}")
+        logger.debug(f"Configuration file not accessible at {args.conf_path}")
         exit_flag = True
     if args.exec_fpath != "" and not is_file_accessible(args.exec_fpath, 'r'):
         print(f"Command execution file doesn't exist at {args.exec_fpath}")
+        logger.debug(f"Command execution file not accessible at {args.exec_fpath}")
         exit_flag = True
     if not exit_flag:
         # Create an object of rexe class.
