@@ -149,7 +149,7 @@ class Rexe:
                         self.execute_command(node, command)
             else:
                 for command in commands_list:
-                    self.execute_command(node, command)
+                    self.execute_command(command_node, command)
 
 if __name__ == "__main__":
     exit_flag = False
