@@ -65,6 +65,7 @@ class Rexe:
         """
         Function to parse the exec file
         """
+        logger.debug("Parsing exec file")
         self.exec_file_handle = open(self.command_file_path)
         self.exec_data = yaml.load(self.exec_file_handle, Loader=yaml.FullLoader)
         self.conf_file_handle.close()
@@ -75,10 +76,13 @@ class Rexe:
         Function to establish connection with the given
         set of hosts.
         """
+        logger.debug("establish connection")
         self.node_dict = {}
         self.connect_flag = True
+        
         for node in self.host_list:
             node_ssh_client = paramiko.SSHClient()
+
             node_ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             try:
                 node_ssh_client.connect(hostname=node, username=self.host_user, password=self.host_passwd)
@@ -98,7 +102,7 @@ class Rexe:
             return ret_dict
         stdin, stdout, stderr = self.node_dict[node].exec_command(cmd)
         if stderr.readlines() != []:
-            log.info(stderr.readlines())
+            logger.info(stderr.readlines())
 
         ret_dict['Flag'] = True
         ret_dict['msg'] = stdout.readlines()
@@ -117,7 +121,10 @@ class Rexe:
                 continue
             commands_list = self.exec_data[command_node]
             for command_line in commands_list:
-                pass #for compiling else gives Indentation Error
+                print(command_line) #for compiling else gives Indentation Error
+                dic = self.execute_command(command_node, command_line)
+                for each in dic['msg']:
+                    print(each)
         print("Run the whole script.")
 
 if __name__ == "__main__":
