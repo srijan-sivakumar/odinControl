@@ -1,11 +1,34 @@
 IP_Address 1: 
-  - "command 1"
-  - "command 2"
-  - "ex: cat PATH/TO/THE/FILE"
+  - command 1
+  - command 2
 
 IP_Address 2:
-  - "Command 1"
-  - "Command 2"
+  - Command 1
+  - Command 2
+
+# allp is to be used to execute commands parallely in all the nodes.
+# hence Command 1 will be executed in all nodes parallely in all nodes
+# before moving on to Command 2
+allp:
+  - Command 1
+  - Command 2
+
+# alls is to be used to execute commands sequentially in all nodes
+# hence Command 1 will be executed in each node sequentially before
+# Command 2
+alls:
+  - Command 1
+  - Command 2
 
 # these commands will execute
 # remember that the IP addresses mentioned here should match the ones in conf.yaml
+#
+# For example
+#
+# a.b.c.d:
+#   - ls
+#   - top
+#
+# allp:
+#   - ll 
+# 
