@@ -1,0 +1,11 @@
+IP_Address 1: 
+  - "command 1"
+  - "command 2"
+  - "ex: cat PATH/TO/THE/FILE"
+
+IP_Address 2:
+  - "Command 1"
+  - "Command 2"
+
+# these commands will execute
+# remember that the IP addressed mentioned here should match the ones in conf.yaml
