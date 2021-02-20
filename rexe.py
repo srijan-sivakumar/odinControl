@@ -52,7 +52,7 @@ class Rexe:
     def parse_conf_file(self):
         """
         Function to parse the config file to get
-        host details, host username and password.
+        the host details, host username and password.
         """
         self.conf_file_handle = open(self.conf_path)
         self.conf_data = yaml.load(self.conf_file_handle, Loader=yaml.FullLoader)
