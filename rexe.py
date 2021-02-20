@@ -98,7 +98,7 @@ class Rexe:
             return ret_dict
         stdin, stdout, stderr = self.node_dict[node].exec_command(cmd)
         if stderr.readlines() != []:
-            log.info(stderr.readlines())
+            logger.info(stderr.readlines())
 
         ret_dict['Flag'] = True
         ret_dict['msg'] = stdout.readlines()
