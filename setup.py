@@ -1,11 +1,17 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-setup(name='odinControl',
+with open('README.md') as f:
+      readme = f.read()
+
+with open('LICENSE') as f:
+      license = f.read()
+
+setup(name='rexe',
       version='0.1',
-      description='Remote execution of commands from local machine both in  sequential and parallel',
+      description=readme,
       url='https://github.com/srijan-sivakumar/odinControl',
       author='Srijan Sivakumar',
       author_email='ssivakum@redhat.com',
-      license='GNU General Public License',
-      packages=['odinControl'],
+      license=license,
+      packages=['sample'],
       zip_safe=False) 
