@@ -5,7 +5,7 @@ gluster-download:
   - dnf install ctags cscope
   - mkdir -p /Sourcecode/
   # - git clone 
-  - cd /Sourcecode/upstream/glusterfs/
+  - cd /Sourcecode/glusterfs/
   - make uninstall
   - make clean
   - make distclean
