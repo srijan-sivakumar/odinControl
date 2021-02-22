@@ -1,1 +1,3 @@
-import rexe from ../rexe
+import sys
+sys.path.append("../")
+from rexe import Rexe
