@@ -43,6 +43,7 @@ For example if somebody had to execute a command `ls /home` on the first node in
 
 Now the return value will be of the following format,
 
+```javascript
 {
   'Flag' : True/False,
   'node' : "the node for which the command was run",
@@ -50,6 +51,7 @@ Now the return value will be of the following format,
   'error_code' : BASH error code in integer
   'msg' : "The return value in form of dictionary for glusterfs commands or string for other commands"
 }
+```
 
 In case of multinode command execution, the result will be a list of result dictionaries of all the nodes
 so if we have `ret`', `ret2`, `ret3` then the return value of `execute_command_multinode` will be
