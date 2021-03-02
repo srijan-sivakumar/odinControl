@@ -5,7 +5,7 @@ import logging
 import logging.handlers
 import paramiko
 import yaml
-
+import xmltodict
 
 logger = logging.getLogger(__name__)
 
@@ -101,12 +101,23 @@ class Rexe:
             ret_dict['Flag'] = False
             return ret_dict
         stdin, stdout, stderr = self.node_dict[node].exec_command(cmd)
-        if stderr.readlines() != []:
-            logger.error(stderr.readlines())
+        if stdout.channel.recv_exit_status() != 0:
+            ret_dict['Flag'] = False
+            logger.error(f"{node};{cmd};{stdout.channel.recv_exit_status()}")
+            ret_dict['msg'] = stdout.readlines()
+        else:
+            if cmd.split(' ', 1)[0] == 'gluster':
+                stdout_xml_string = ""
+                for line in stdout.readlines():
+                    stdout_xml_string += line
+                ret_dict['msg'] = xmltodict.parse(stdout_xml_string)['cliOutput']
+            else:
+                ret_dict['msg'] = stdout.readlines()
+            ret_dict['Flag'] = True
         ret_dict['node'] = node
         ret_dict['cmd'] = cmd
-        ret_dict['Flag'] = True
-        ret_dict['msg'] = stdout.readlines()
+        ret_dict['error_code'] = stdout.channel.recv_exit_status()
+        
         logger.debug(ret_dict)
         return ret_dict
 
