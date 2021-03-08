@@ -103,8 +103,8 @@ class Rexe:
         stdin, stdout, stderr = self.node_dict[node].exec_command(cmd)
         if stdout.channel.recv_exit_status() != 0:
             ret_dict['Flag'] = False
-            logger.error(f"{node};{cmd};{stdout.channel.recv_exit_status()}")
             ret_dict['msg'] = stdout.readlines()
+            ret_dict['error_msg'] = stderr.readlines()
         else:
             if cmd.split(' ', 1)[0] == 'gluster':
                 stdout_xml_string = ""
